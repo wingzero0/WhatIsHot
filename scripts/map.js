@@ -10,22 +10,63 @@ function GPSloading(){
 		initialize(position);
 	}
 }
+function CreateHotSpot(mouseEvent){
+	//alert(mouseEvent.latLng.lat());
+	content='<form id="createTrip">請輸入活動名稱：<input type="text" name="title"><br/>'+
+		'簡述：<textarea row="10" name="description"></textarea><br/>'+
+		'開始時間<input type="text" name="start"    id="start"><br/>'+
+		'結束時間<input type="text" name="end"    id="end"><br/>'+
+		'<input type="hidden" name="uid" id="uid" value="testId">'+
+		'<input type="hidden" name="lat" id="lat" value="'+ mouseEvent.latLng.lat() + '">' +
+		'<input type="hidden" name="long" id="long" value="'+ mouseEvent.latLng.lng() +'">'+
+		'</form>';
+
+	openPopUpBox(content,600,300,'');
+}
+
+function SearchAddress(){
+	var geocoder = new google.maps.Geocoder();
+	var address = document.getElementById("address").value;
+	geocoder.geocode( { 'address': address}, function(results, status) {
+		if (status == google.maps.GeocoderStatus.OK) {
+			map.setCenter(results[0].geometry.location);
+			var marker = new google.maps.Marker({
+				map: map,
+					position: results[0].geometry.location
+			});
+		} else {
+			alert("搜尋失敗原因: " + status);
+		}
+	});
+}
 
 function initialize(position) {
 	var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 	var myOptions = {zoom: 15,
 		center: latlng,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
+		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		disableDoubleClickZoom: true
 	};
 	map = new google.maps.Map(document.getElementById("map_canvas"),
 			myOptions);
 
+	var image = new google.maps.MarkerImage('images/foot.png',
+			null ,
+			// The origin for this image is 0,0.
+			new google.maps.Point(0,0),
+			// The anchor for this image is the base of the flagpole at 0,32.
+			new google.maps.Point(0, 40),
+			new google.maps.Size(30, 40)
+			);
+
 	var marker = new google.maps.Marker({
 		position: latlng, 
 			map: map,
-			title:"you are here(" + position.coords.latitude +"," + position.coords.longitude+")"
+			title:"you are here(" + position.coords.latitude +"," + position.coords.longitude+")",
+			icon: image
 	});
 	GetSpot();
+	google.maps.event.addListener(map, 'dblclick', CreateHotSpot);
 }
 
 function DrowSpot(spot){
@@ -38,8 +79,8 @@ function DrowSpot(spot){
 	marker.setTitle(spot.title);
 
 	var msg = "<p>" + spot.title + "<br /><br />" + 
-		spot.description + "<br />起始時間:" + spot.start +
-		"<br />結束時間:" + spot.end + "</p>";
+		spot.description + "<br /> 起始時間:" + spot.start +
+		"<br /> 結束時間:" + spot.end + "</p>";
 
 	var infowindow = new google.maps.InfoWindow(
 			{ content: msg,
@@ -60,10 +101,10 @@ function GetSpot(){
 			var i =0;
 			for (i = 0;i<data.num;i++){
 				/*
-				$.each(data.spot[i], function(key, value) {
-					alert(key + ': ' + value);
-				});
-				*/
+					 $.each(data.spot[i], function(key, value) {
+					 alert(key + ': ' + value);
+					 });
+					 */
 				DrowSpot(data.spot[i]);
 			}
 

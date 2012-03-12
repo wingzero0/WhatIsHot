@@ -51,6 +51,25 @@ class HotSpot extends CI_Controller {
 		$ret_array["result"] = true;
 		echo json_encode($ret_array);
 	}
+	public function CreateHotSpot(){
+		$postFields = array("lat", "long", "title", "description", "start", "end", "user");
+		$ret_array["result"] = false;
+		$ret_array["error_msg"] = null;
+		
+		if ( ! $this->CheckPostField($ret_array, $postFields) ){
+			return false;
+		}
+		$sql = sprintf(
+			"insert into `Activity` (`Lat`, `Long`, `Title`, `Description`, `StartTime`, `EndTime`, `User`)
+			values (%lf, %lf, '%s', '%s', '%s', '%s', '%s')", 
+			$_POST["lat"], $_POST["long"], $_POST["title"], $_POST["description"],
+			$_POST["start"], $_POST["end"], $_POST["user"]
+		);
+		$query = $this->db->query($sql);
+		$ret_array["result"] = true;
+		echo json_encode($ret_array);
+	
+	}
 
 	public function index()
 	{
